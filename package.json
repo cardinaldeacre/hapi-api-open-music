@@ -1,0 +1,29 @@
+{
+	"name": "openmusic-api",
+	"version": "1.0.0",
+	"main": "src/server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node server.js",
+		"migrate": "node-pg-migrate"
+	},
+	"keywords": [
+		"hapi",
+		"postgresql"
+	],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"@hapi/hapi": "^21.4.4",
+		"@hapi/joi": "^17.1.1",
+		"@hapi/jwt": "^3.2.1",
+		"auto-bind": "^5.0.1",
+		"bcrypt": "^6.0.0",
+		"dotenv": "^17.2.3",
+		"jsonwebtoken": "^9.0.2",
+		"nanoid": "^5.1.6",
+		"node-pg-migrate": "^7.6.1",
+		"pg": "^8.16.3"
+	}
+}
