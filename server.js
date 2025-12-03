@@ -1,15 +1,23 @@
 require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 const albums = require('./src/api/albums');
 const songs = require('./src/api/songs');
 
 const AlbumService = require('./src/services/AlbumService');
 const SongService = require('./src/services/SongService');
+const AuthService = require('./src/services/AuthService');
+const UsersService = require('./src/services/UsersService');
+
+const UserValidator = require('./src/validator/users');
+const AuthValidator = require('./src/validator/auth');
 
 const ClientError = require('./src/exception/ClientError');
 
 const init = async () => {
+	const userService = new UsersService();
+	const authService = new AuthService();
 	const albumService = new AlbumService();
 	const songService = new SongService();
 
@@ -36,10 +44,45 @@ const init = async () => {
 				service: songService,
 			},
 		},
+		{
+			plugin: Jwt
+		}
 	]);
 
+	server.auth.strategy('openmusic_jwt', 'jwt', {
+		keys: process.env.ACCESS_TOKEN_KEY,
+		verify: {
+			aud: false,
+			iss: false,
+			sub: false,
+			maxAgeSec: process.env.ACCESS_TOKEN_AGE || 3600,
+		},
+		validate: (data) => ({
+			isValid: true,
+			credentials: {
+				id: data.decoded.payload.userId,
+			},
+		}),
+	})
+
+	await server.register([
+		{
+			plugin: users,
+			options: { service: userService, validator: UserValidator }
+		},
+		{
+			plugin: auth,
+			options:
+				userService,
+			authService,
+			tokenManager: tokenManager,
+			validator: AuthValidator
+
+		}
+	])
+
 	server.ext('onPreResponse', (request, h) => {
-		const {response} = request;
+		const { response } = request;
 
 		if (response instanceof ClientError) {
 			const newResponse = h.response({
