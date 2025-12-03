@@ -4,6 +4,10 @@ const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const albums = require('./src/api/albums');
 const songs = require('./src/api/songs');
+const users = require('./src/api/users');
+const auth = require('./src/api/auth');
+
+const tokenManager = require('./src/tokenize/TokenManager')
 
 const AlbumService = require('./src/services/AlbumService');
 const SongService = require('./src/services/SongService');
