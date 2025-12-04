@@ -6,6 +6,8 @@ const albums = require('./src/api/albums');
 const songs = require('./src/api/songs');
 const users = require('./src/api/users');
 const auth = require('./src/api/auth');
+const playlist = require('./src/api/playlist');
+const collaboration = require('./src/api/collaboration')
 
 const tokenManager = require('./src/tokenize/TokenManager')
 
@@ -13,9 +15,13 @@ const AlbumService = require('./src/services/AlbumService');
 const SongService = require('./src/services/SongService');
 const AuthService = require('./src/services/AuthService');
 const UsersService = require('./src/services/UsersService');
+const PlaylistService = require('./src/services/PlaylistService')
+const CollaborationService = require('./src/services/CollaborationService')
 
 const UserValidator = require('./src/validator/users');
 const AuthValidator = require('./src/validator/auth');
+const PlaylistValidator = require('./src/validator/playlists')
+const CollaborationValidator = require('./src/validator/collaboration')
 
 const ClientError = require('./src/exception/ClientError');
 
@@ -24,6 +30,8 @@ const init = async () => {
 	const authService = new AuthService();
 	const albumService = new AlbumService();
 	const songService = new SongService();
+	const playlistService = new PlaylistService();
+	const collaborationService = new CollaborationService();
 
 	const server = Hapi.server({
 		port: process.env.PORT,
@@ -37,21 +45,9 @@ const init = async () => {
 
 	await server.register([
 		{
-			plugin: albums,
-			options: {
-				service: albumService,
-			},
-		},
-		{
-			plugin: songs,
-			options: {
-				service: songService,
-			},
-		},
-		{
 			plugin: Jwt
-		}
-	]);
+		},
+	])
 
 	server.auth.strategy('openmusic_jwt', 'jwt', {
 		keys: process.env.ACCESS_TOKEN_KEY,
@@ -71,19 +67,46 @@ const init = async () => {
 
 	await server.register([
 		{
-			plugin: users,
-			options: { service: userService, validator: UserValidator }
-		},
-		{
 			plugin: auth,
 			options:
 				userService,
 			authService,
 			tokenManager: tokenManager,
 			validator: AuthValidator
-
-		}
-	])
+		},
+		{
+			plugin: albums,
+			options: {
+				service: albumService,
+			},
+		},
+		{
+			plugin: songs,
+			options: {
+				service: songService,
+			},
+		},
+		{
+			plugin: playlist,
+			options: {
+				service: playlistService,
+				songService,
+				validator: PlaylistValidator
+			}
+		},
+		{
+			plugin: users,
+			options: { service: userService, validator: UserValidator }
+		},
+		{
+			plugin: collaboration,
+			options: {
+				collaborationService,
+				playlistService,
+				validator: CollaborationValidator,
+			},
+		},
+	]);
 
 	server.ext('onPreResponse', (request, h) => {
 		const { response } = request;

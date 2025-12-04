@@ -1,5 +1,4 @@
-const autoBind = require('auto-bind');
-const InvariantError = require('../../exception/InvariantError')
+const autoBind = require('auto-bind').default;
 
 class PlaylistsHandler {
     constructor(playlistService, songService, validator) {
