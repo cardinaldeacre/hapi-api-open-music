@@ -14,7 +14,7 @@ class AuthHandler {
         this._validator.validatePostAuthPayload(request.payload);
 
         const { username, password } = request.payload;
-        const userId = await this._userService.verifyCredential(username, password);
+        const userId = await this._userService.verifyUserCredential(username, password);
         const accessToken = this._tokenManager.generateAccessToken({ userId });
         const refreshToken = this._tokenManager.generateRefreshToken({ userId });
 

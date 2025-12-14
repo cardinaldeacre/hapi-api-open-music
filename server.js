@@ -68,11 +68,12 @@ const init = async () => {
 	await server.register([
 		{
 			plugin: auth,
-			options:
+			options: {
 				userService,
-			authService,
-			tokenManager: tokenManager,
-			validator: AuthValidator
+				authService,
+				tokenManager: tokenManager,
+				validator: AuthValidator,
+			},
 		},
 		{
 			plugin: albums,
