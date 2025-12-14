@@ -15,7 +15,7 @@ class UserHandler {
         const userId = await this._service.addUser({ username, password, fullname });
 
         return h.response({
-            status: 'succss',
+            status: 'success',
             data: {
                 userId,
             }

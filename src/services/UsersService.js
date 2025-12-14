@@ -2,7 +2,8 @@ const pool = require('./PgPool')
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const InvariantError = require('../exception/InvariantError')
-const NotFoundError = require('../exception/NotFoundError')
+const NotFoundError = require('../exception/NotFoundError');
+const AuthenticationError = require('../exception/AuthenticationError');
 
 class UsersService {
     constructor() {
@@ -50,14 +51,14 @@ class UsersService {
         const result = await this._pool.query(query);
 
         if (!result.rows.length) {
-            throw new InvariantError('Username atau password salah')
+            throw new AuthenticationError('Username atau password salah')
         }
 
         const { id, password: hasheddPassword } = result.rows[0];
         const match = await bcrypt.compare(password, hasheddPassword);
 
         if (!match) {
-            throw new InvariantError('Password salah')
+            throw new AuthenticationError('Password salah')
         }
 
         return id;

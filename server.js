@@ -24,6 +24,8 @@ const PlaylistValidator = require('./src/validator/playlists')
 const CollaborationValidator = require('./src/validator/collaboration')
 
 const ClientError = require('./src/exception/ClientError');
+const NotFoundError = require('./src/exception/NotFoundError');
+const AuthorizationError = require('./src/exception/AuthorizationError');
 
 const init = async () => {
 	const userService = new UsersService();
@@ -122,23 +124,26 @@ const init = async () => {
 			return newResponse;
 		}
 
+		if (response instanceof AuthorizationError) {
+			const newResponse = h.response({
+				status: 'fail',
+				message: response.message,
+			});
+
+			newResponse.code(response.statusCode);
+			return newResponse;
+		}
+
+		if (response instanceof NotFoundError) {
+			const newResponse = h.response({
+				status: 'fail',
+				message: response.message,
+			});
+			newResponse.code(response.statusCode);
+			return newResponse;
+		}
+
 		if (response.isBoom) {
-			if (response.output.statusCode === 404) {
-				const newResponse = h.response({
-					status: 'fail',
-					message: 'Resource tidak ditemukan',
-				});
-				newResponse.code(404);
-				return newResponse;
-			}
-			if (response.output.statusCode === 400) {
-				const newResponse = h.response({
-					status: 'fail',
-					message: response.output.payload.message,
-				});
-				newResponse.code(400);
-				return newResponse;
-			}
 			if (response.output.statusCode >= 500) {
 				console.error('Server Error (5xx) Stack Trace:', response);
 				const newResponse = h.response({
@@ -146,6 +151,15 @@ const init = async () => {
 					message: 'Terjadi kegagalan pada server kami',
 				});
 				newResponse.code(500);
+				return newResponse;
+			}
+
+			if (response.output.statusCode === 401 || response.output.statusCode === 403) {
+				const newResponse = h.response({
+					status: 'fail',
+					message: response.output.payload.message || 'Akses tidak diizinkan',
+				});
+				newResponse.code(response.output.statusCode);
 				return newResponse;
 			}
 

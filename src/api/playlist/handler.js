@@ -3,7 +3,7 @@ const autoBind = require('auto-bind').default;
 class PlaylistsHandler {
     constructor(playlistService, songService, validator) {
         this._service = playlistService;
-        this._songService = songService;
+        this._songsService = songsService;
         this._validator = validator;
 
         autoBind(this);
