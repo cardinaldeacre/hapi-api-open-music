@@ -3,7 +3,7 @@ const autoBind = require('auto-bind').default;
 class PlaylistsHandler {
     constructor(playlistService, songService, validator) {
         this._service = playlistService;
-        this._songsService = songsService;
+        this._songService = songService;
         this._validator = validator;
 
         autoBind(this);
@@ -60,7 +60,7 @@ class PlaylistsHandler {
         const { id: userId } = request.auth.credentials;
 
         await this._service.verifyPlaylistAccess(playlistId, userId);
-        await this._songsService.verifySongIsExist(songId);
+        await this._songService.verifySongIsExist(songId);
         await this._service.addSongToPlaylist(playlistId, songId);
 
         return h.response({
