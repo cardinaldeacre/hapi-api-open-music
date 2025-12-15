@@ -5,7 +5,7 @@ const InvariantError = require('../../exception/InvariantError');
 module.exports = {
     name: 'playlists',
     version: '1.0.0',
-    register: async (server, { service, songsService, validator }) => {
+    register: async (server, { service, songService, validator }) => {
 
         const playlistsValidator = {
             validatePlaylistPayload: (payload) => {
@@ -24,11 +24,11 @@ module.exports = {
             },
         };
 
-        const playlistsHandler = new PlaylistsHandler({
-            playlistsService: service,
-            songsService,
-            validator: playlistsValidator
-        });
+        const playlistsHandler = new PlaylistsHandler(
+            service,
+            songService,
+            playlistsValidator
+        );
 
         server.route(routes(playlistsHandler));
     },

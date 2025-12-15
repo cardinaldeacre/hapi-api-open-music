@@ -11,7 +11,7 @@ const TokenManager = {
 
             Jwt.token.verifySignature(data, process.env.REFRESH_TOKEN_KEY)
 
-            const { payload } = data
+            const { payload } = data.decoded;
             return payload;
         } catch (error) {
             throw new InvariantError('Refresh token tidak valid');

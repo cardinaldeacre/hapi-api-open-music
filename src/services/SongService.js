@@ -1,4 +1,4 @@
-const {nanoid} = require('nanoid');
+const { nanoid } = require('nanoid');
 const pool = require('./PgPool');
 const NotFoundError = require('../exception/NotFoundError');
 const InvariantError = require('../exception/InvariantError');
@@ -8,7 +8,7 @@ class SongService {
 		this._pool = pool;
 	}
 
-	async addSong({title, year, genre, performer, duration, albumId}) {
+	async addSong({ title, year, genre, performer, duration, albumId }) {
 		const id = `song-${nanoid(16)}`;
 		const createdAt = new Date().toISOString();
 
@@ -35,7 +35,7 @@ class SongService {
 		}
 	}
 
-	async getSongs({title, performer}) {
+	async getSongs({ title, performer }) {
 		let queryText = 'SELECT id, title, performer FROM songs';
 		const queryValues = [];
 		const conditions = [];
@@ -79,7 +79,7 @@ class SongService {
 		return result.rows[0];
 	}
 
-	async editSongById(id, {title, year, performer, genre, duration, albumId}) {
+	async editSongById(id, { title, year, performer, genre, duration, albumId }) {
 		const updatedAt = new Date().toISOString();
 		const query = {
 			text:
@@ -91,6 +91,19 @@ class SongService {
 
 		if (!result.rows.length) {
 			throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
+		}
+	}
+
+	async verifySongIsExist(id) {
+		const query = {
+			text: 'SELECT id FROM songs where id = $1',
+			values: [id]
+		}
+
+		const result = await this._pool.query(query);
+
+		if (!result.rows.length) {
+			throw new NotFoundError('Lagu tidak ditemukan. SongId tidak valid');
 		}
 	}
 
