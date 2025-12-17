@@ -8,6 +8,7 @@ const users = require('./src/api/users');
 const auth = require('./src/api/auth');
 const playlist = require('./src/api/playlist');
 const collaboration = require('./src/api/collaboration')
+const _exports = require('./src/api/exports');
 
 const tokenManager = require('./src/tokenize/TokenManager')
 
@@ -17,11 +18,13 @@ const AuthService = require('./src/services/AuthService');
 const UsersService = require('./src/services/UsersService');
 const PlaylistService = require('./src/services/PlaylistService')
 const CollaborationService = require('./src/services/CollaborationService')
+const ProducerService = require('./src/services/rabbitmq/ProducerService');
 
 const UserValidator = require('./src/validator/users');
 const AuthValidator = require('./src/validator/auth');
-const PlaylistValidator = require('./src/validator/playlists')
-const CollaborationValidator = require('./src/validator/collaboration')
+const PlaylistValidator = require('./src/validator/playlists');
+const CollaborationValidator = require('./src/validator/collaboration');
+const ExportsValidator = require('./src/validator/exports');
 
 const ClientError = require('./src/exception/ClientError');
 const NotFoundError = require('./src/exception/NotFoundError');
@@ -109,6 +112,14 @@ const init = async () => {
 				validator: CollaborationValidator,
 			},
 		},
+		{
+			plugin: _exports,
+			options: {
+				service: ProducerService,
+				playlistService,
+				validator: ExportsValidator
+			}
+		}
 	]);
 
 	server.ext('onPreResponse', (request, h) => {
