@@ -15,7 +15,7 @@ class AlbumLikeSerice {
             values: [userId, albumId],
         };
 
-        const resultCheck = await this._pool(queryCheckLike);
+        const resultCheck = await this._pool.query(queryCheckLike);
 
         if (!resultCheck.rows.length > 0) {
             throw new InvariantError('Gagal memberi like, Anda sudah memberi like album ini');
