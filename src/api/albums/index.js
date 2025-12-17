@@ -6,7 +6,7 @@ const InvariantError = require('../../exception/InvariantError');
 module.exports = {
 	name: 'albums',
 	version: '1.0.0',
-	register: async (server, { service, storageService, validator }) => {
+	register: async (server, { service, storageService, albumLikeService, validator }) => {
 		const albumsValidator = {
 			validateAlbumPayload: payload => {
 				const validationResult = AlbumPayloadSchema.validate(payload);
@@ -20,7 +20,7 @@ module.exports = {
 			}
 		};
 
-		const handler = new AlbumHandler(service, storageService, albumsValidator);
+		const handler = new AlbumHandler(service, storageService, albumLikeService, albumsValidator);
 		server.route(routes(handler));
 	},
 };
