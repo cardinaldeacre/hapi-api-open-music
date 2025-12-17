@@ -1,4 +1,4 @@
-const {nanoid} = require('nanoid');
+const { nanoid } = require('nanoid');
 const pool = require('./PgPool');
 const InvariantError = require('../exception/InvariantError');
 const NotFoundError = require('../exception/NotFoundError');
@@ -8,7 +8,7 @@ class AlbumService {
 		this._pool = pool;
 	}
 
-	async addAlbum({name, year}) {
+	async addAlbum({ name, year }) {
 		const id = `album-${nanoid(16)}`;
 		const createdAt = new Date().toISOString();
 
@@ -21,7 +21,6 @@ class AlbumService {
 		const result = await this._pool.query(query);
 		if (!result.rows[0].id) {
 			throw new InvariantError('Album gagal ditambahkan');
-			return result;
 		}
 
 		return result.rows[0].id;
@@ -30,11 +29,11 @@ class AlbumService {
 	async getAlbumById(id) {
 		const query = {
 			text: `
-            SELECT a.id, a.name, a.year, s.id AS song_id, s.title, s.performer
-            FROM albums a
-            LEFT JOIN songs s ON a.id = s.album_id
-            WHERE a.id = $1
-            `,
+        SELECT a.id, a.name, a.year, a.cover, s.id AS song_id, s.title, s.performer
+        FROM albums a
+        LEFT JOIN songs s ON a.id = s.album_id
+        WHERE a.id = $1
+        `,
 			values: [id],
 		};
 
@@ -45,21 +44,25 @@ class AlbumService {
 		}
 
 		const albumInfo = result.rows[0];
-		const songs = result.rows.filter(row => row.song_id).map(row => ({
-			id: row.song_id,
-			title: row.title,
-			performer: row.performer,
-		}));
+
+		const songs = result.rows
+			.filter(row => row.song_id)
+			.map(row => ({
+				id: row.song_id,
+				title: row.title,
+				performer: row.performer,
+			}));
 
 		return {
 			id: albumInfo.id,
 			name: albumInfo.name,
 			year: albumInfo.year,
+			coverUrl: albumInfo.cover,
 			songs,
 		};
 	}
 
-	async editAlbumById(id, {name, year}) {
+	async editAlbumById(id, { name, year }) {
 		const updatedAt = new Date().toISOString();
 		const query = {
 			text: 'UPDATE albums SET name = $1, year = $2, updated_at = $3 WHERE id = $4 RETURNING id',
@@ -83,6 +86,19 @@ class AlbumService {
 
 		if (!result.rows.length) {
 			throw new NotFoundError('Album gagal dihapus. Id tidak ditemukan');
+		}
+	}
+
+	async updateAlbumCover(id, coverUrl) {
+		const query = {
+			text: 'UPDATE albums SET cover = $1 WHERE id = $2 RETURNING id',
+			values: [coverUrl, id],
+		};
+
+		const result = await this._pool.query(query);
+
+		if (!result.rows.length) {
+			throw new NotFoundError('Gagal memperbarui sampul. Id tidak ditemukann');
 		}
 	}
 }
