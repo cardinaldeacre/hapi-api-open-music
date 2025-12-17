@@ -70,3 +70,4 @@ pids/
 # ─────────────────────────────────────────
 .env.*
 uploads/
+src/api/albums/covers/images/*
