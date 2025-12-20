@@ -1,12 +1,10 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('./../exception/InvariantError');
-const CacheService = require('./redis/CacheService');
-
 class AlbumLikeSerice {
-    constructor() {
+    constructor(cacheService) {
         this._pool = new Pool();
-        this._cacheService = CacheService;
+        this._cacheService = cacheService;
     }
 
     async addAlbumLike(userId, albumId) {
@@ -17,7 +15,7 @@ class AlbumLikeSerice {
 
         const resultCheck = await this._pool.query(queryCheckLike);
 
-        if (!resultCheck.rows.length > 0) {
+        if (resultCheck.rows.length > 0) {
             throw new InvariantError('Gagal memberi like, Anda sudah memberi like album ini');
         }
 
@@ -42,7 +40,7 @@ class AlbumLikeSerice {
             values: [userId, albumId],
         };
 
-        const result = await this._pool(query);
+        const result = await this._pool.query(query);
 
         if (!result.rows.length) {
             throw new InvariantError('Gagal membatalkan suka, Like tidak ditemukan');
@@ -67,6 +65,7 @@ class AlbumLikeSerice {
             const result = await this._pool.query(query);
             const likesCount = result.rows.length;
 
+            await this._cacheService.set(`likes:${albumId}`, likesCount.toString());
             await this._cacheService.set(`likes:${albumId}`, likesCount.toString());
             return {
                 likes: likesCount,
